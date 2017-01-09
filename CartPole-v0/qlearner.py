@@ -2,7 +2,7 @@
 # @Author: shubham
 # @Date:   2017-01-07 15:58:30
 # @Last Modified by:   shubham
-# @Last Modified time: 2017-01-07 16:00:39
+# @Last Modified time: 2017-01-09 11:53:28
 
 import gym
 from gym import wrappers
@@ -10,9 +10,6 @@ from gym import wrappers
 import pandas as pd
 import numpy as np
 import random
-
-# https://gym.openai.com/envs/CartPole-v0
-# Carlos Aguayo - carlos.aguayo@gmail.com
 
 
 class QLearner(object):
@@ -133,7 +130,7 @@ def cart_pole_with_qlearning():
 			print("Best 100-episode performance {} {} {}".format(last_time_steps.max(),
 																  chr(177),  # plus minus sign
 																  last_time_steps.std()))
-			break
+			# break
 
 	env.close()
 	gym.upload(outdir, api_key='sk_9YxUhFDaT5XSahcLut47w')
