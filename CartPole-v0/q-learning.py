@@ -2,7 +2,7 @@
 # @Author: shubham
 # @Date:   2017-01-10 19:37:24
 # @Last Modified by:   shubham
-# @Last Modified time: 2017-01-10 22:06:20
+# @Last Modified time: 2017-01-10 23:09:02
 
 import gym
 from gym import wrappers
@@ -39,22 +39,25 @@ class Agent(object):
 
 	def set_initial_state(self, state):
 		self.state = state
-		self.action = policy(state)
+		self.action = self.policy(state)
 		return self.action
 	
 	def act(self, next_state, reward):
 		state = self.state
 		action = self.action
 		alpha = self.alpha
+		gamma = self.gamma
 
 		# TD Update
 		td_target = reward + gamma * np.max(self.Q[next_state])
-		td_error = td_target - Q[state][action]
+		td_error = td_target - self.Q[state][action]
 		self.Q[state][action] += alpha * td_error
 		
+		# select next action eps-greedy
 		next_action = self.policy(next_state)
-
-
+		self.state = next_state
+		self.action = next_action
+		return self.action
 
 
 def build_state(observation):
@@ -72,23 +75,23 @@ def main():
 	# env = wrappers.Monitor(env, directory=outdir, force=True)
 
 	agent = Agent(env.action_space.n)
-	for i_episode in range(1000):
-		if (i_episode + 1) % 100 == 0:
-			print("\rEpisode {}".format(i_episode + 1), end="")
-			sys.stdout.flush()
-
+	for i_episode in range(100000):
 		observation = env.reset()
 		state = build_state(observation)
 		action = agent.set_initial_state(state)
 
+		episode_reward = 0
 		for t in itertools.count():
 			next_ob, reward, done, info = env.step(action)
+			episode_reward += reward
 			next_state = build_state(next_ob)
-			
 			action = agent.act(next_state, reward)
-			
 			if done:
 				break
+
+		if (i_episode + 1) % 100 == 0:
+			print("\rEpisode: {}, Reward: {}".format(i_episode + 1, episode_reward), end="")
+			sys.stdout.flush()
 	
 	env.close()
 	# gym.upload(outdir, api_key='sk_9YxUhFDaT5XSahcLut47w')
