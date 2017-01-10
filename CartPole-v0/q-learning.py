@@ -2,7 +2,7 @@
 # @Author: shubham
 # @Date:   2017-01-10 19:37:24
 # @Last Modified by:   shubham
-# @Last Modified time: 2017-01-10 23:35:50
+# @Last Modified time: 2017-01-10 23:37:21
 
 import gym
 from gym import wrappers
@@ -77,7 +77,7 @@ def build_state(observation):
 def main():
 	env = gym.make('CartPole-v0')
 	outdir = './experiment-results'
-	# env = wrappers.Monitor(env, directory=outdir, force=True)
+	env = wrappers.Monitor(env, directory=outdir, force=True)
 
 	agent = Agent(env.action_space.n)
 	for i_episode in range(100000):
@@ -91,7 +91,7 @@ def main():
 			episode_reward += reward
 			next_state = build_state(next_ob)
 
-			if done: reward = -100
+			if done: reward = -200
 			action = agent.act(next_state, reward)
 			if done:
 				break
@@ -101,7 +101,7 @@ def main():
 			sys.stdout.flush()
 	
 	env.close()
-	# gym.upload(outdir, api_key='sk_9YxUhFDaT5XSahcLut47w')
+	gym.upload(outdir, api_key='sk_9YxUhFDaT5XSahcLut47w')
 
 
 if __name__ == '__main__':
