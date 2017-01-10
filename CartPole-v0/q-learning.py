@@ -2,7 +2,7 @@
 # @Author: shubham
 # @Date:   2017-01-10 19:37:24
 # @Last Modified by:   shubham
-# @Last Modified time: 2017-01-10 23:09:02
+# @Last Modified time: 2017-01-10 23:35:50
 
 import gym
 from gym import wrappers
@@ -17,12 +17,13 @@ from pprint import pprint
 from collections import defaultdict
 
 class Agent(object):
-	def __init__(self, nA=4, epsilon=0.1, alpha=0.5, gamma=1):
+	def __init__(self, nA=4, epsilon=0.5, epsilon_decay=0.99, alpha=0.5, gamma=1):
 		self.nA = nA
 		self.epsilon = epsilon
+		self.epsilon_decay = epsilon_decay
 		self.alpha = alpha
 		self.gamma = gamma
-		self.Q = defaultdict(lambda: np.random.uniform(size=nA))
+		self.Q = defaultdict(lambda: np.random.uniform(low=-1, high=1, size=nA))
 	
 
 	def policy(self, state):
@@ -35,11 +36,15 @@ class Agent(object):
 
 		# select an action base on prob
 		action = np.random.choice(self.nA, p=action_prob)
+
+		# decay epsilon
+		self.epsilon *= self.epsilon_decay
 		return action
 
 	def set_initial_state(self, state):
 		self.state = state
 		self.action = self.policy(state)
+		# print(len(self.Q.keys()))
 		return self.action
 	
 	def act(self, next_state, reward):
@@ -81,10 +86,12 @@ def main():
 		action = agent.set_initial_state(state)
 
 		episode_reward = 0
-		for t in itertools.count():
+		for t in range(200):
 			next_ob, reward, done, info = env.step(action)
 			episode_reward += reward
 			next_state = build_state(next_ob)
+
+			if done: reward = -100
 			action = agent.act(next_state, reward)
 			if done:
 				break
