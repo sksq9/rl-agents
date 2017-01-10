@@ -1,4 +1,6 @@
 import gym
+from gym import wrappers
+
 import pandas as pd
 import numpy as np
 import random
@@ -8,13 +10,7 @@ import random
 
 
 class QLearner(object):
-	def __init__(self,
-				 num_states=100,
-				 num_actions=4,
-				 alpha=0.2,
-				 gamma=0.9,
-				 random_action_rate=0.5,
-				 random_action_decay_rate=0.99):
+	def __init__(self, num_states=100, num_actions=4, alpha=0.2, gamma=0.9, random_action_rate=0.5, random_action_decay_rate=0.99):
 		self.num_states = num_states
 		self.num_actions = num_actions
 		self.alpha = alpha
@@ -67,8 +63,8 @@ class QLearner(object):
 
 def cart_pole_with_qlearning():
 	env = gym.make('CartPole-v0')
-	experiment_filename = './cartpole-experiment-1'
-	env = wrappers.Monitor(env, directory=outdir, force=True)
+	outdir = './cartpole-experiment-1'
+	# env = wrappers.Monitor(env, directory=outdir, force=True)
 
 	goal_average_steps = 195
 	max_number_of_steps = 200
@@ -95,7 +91,12 @@ def cart_pole_with_qlearning():
 					   random_action_rate=0.5,
 					   random_action_decay_rate=0.99)
 
-	for episode in range(50000):
+	for i_episode in range(5000):
+		if (i_episode + 1) % 100 == 0:
+			print("\rEpisode {}".format(i_episode + 1), end="")
+			import sys
+			sys.stdout.flush()
+
 		observation = env.reset()
 		cart_position, pole_angle, cart_velocity, angle_rate_of_change = observation
 		state = build_state([to_bin(cart_position, cart_position_bins),
@@ -104,7 +105,7 @@ def cart_pole_with_qlearning():
 							 to_bin(angle_rate_of_change, angle_rate_bins)])
 		action = learner.set_initial_state(state)
 
-		for step in range(max_number_of_steps - 1):
+		for step in range(max_number_of_steps):
 			observation, reward, done, info = env.step(action)
 
 			cart_position, pole_angle, cart_velocity, angle_rate_of_change = observation
@@ -113,6 +114,7 @@ def cart_pole_with_qlearning():
 									   to_bin(pole_angle, pole_angle_bins),
 									   to_bin(cart_velocity, cart_velocity_bins),
 									   to_bin(angle_rate_of_change, angle_rate_bins)])
+			# print(state_prime)
 
 			if done:
 				reward = -200
@@ -127,7 +129,7 @@ def cart_pole_with_qlearning():
 
 		if last_time_steps.mean() > goal_average_steps:
 			print("Goal reached!")
-			print("Episodes before solve: ", episode + 1)
+			print("Episodes before solve: ", i_episode + 1)
 			print("Best 100-episode performance {} {} {}".format(last_time_steps.max(),
 																  chr(177),  # plus minus sign
 																  last_time_steps.std()))
