@@ -1,19 +1,20 @@
-# -*- coding: utf-8 -*-
-# @Author: shubham
-# @Date:   2017-01-07 15:58:30
-# @Last Modified by:   shubham
-# @Last Modified time: 2017-01-09 11:53:28
-
 import gym
-from gym import wrappers
-
 import pandas as pd
 import numpy as np
 import random
 
+# https://gym.openai.com/envs/CartPole-v0
+# Carlos Aguayo - carlos.aguayo@gmail.com
+
 
 class QLearner(object):
-	def __init__(self, num_states=100, num_actions=4, alpha=0.2, gamma=0.9, random_action_rate=0.5, random_action_decay_rate=0.99):
+	def __init__(self,
+				 num_states=100,
+				 num_actions=4,
+				 alpha=0.2,
+				 gamma=0.9,
+				 random_action_rate=0.5,
+				 random_action_decay_rate=0.99):
 		self.num_states = num_states
 		self.num_actions = num_actions
 		self.alpha = alpha
@@ -67,7 +68,7 @@ class QLearner(object):
 def cart_pole_with_qlearning():
 	env = gym.make('CartPole-v0')
 	experiment_filename = './cartpole-experiment-1'
-	env = wrappers.Monitor(env, directory=experiment_filename, force=True)
+	env = wrappers.Monitor(env, directory=outdir, force=True)
 
 	goal_average_steps = 195
 	max_number_of_steps = 200
@@ -130,11 +131,12 @@ def cart_pole_with_qlearning():
 			print("Best 100-episode performance {} {} {}".format(last_time_steps.max(),
 																  chr(177),  # plus minus sign
 																  last_time_steps.std()))
-			# break
+			break
 
 	env.close()
-	gym.upload(outdir, api_key='sk_9YxUhFDaT5XSahcLut47w')
+	# gym.upload(outdir, api_key='sk_9YxUhFDaT5XSahcLut47w')
 
 if __name__ == "__main__":
 	random.seed(0)
 	cart_pole_with_qlearning()
+	
