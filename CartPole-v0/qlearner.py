@@ -63,7 +63,7 @@ class QLearner(object):
 
 def cart_pole_with_qlearning():
 	env = gym.make('CartPole-v0')
-	outdir = './cartpole-experiment-1'
+	outdir = './experiment-results'
 	# env = wrappers.Monitor(env, directory=outdir, force=True)
 
 	goal_average_steps = 195

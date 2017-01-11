@@ -2,7 +2,7 @@
 # @Author: shubham
 # @Date:   2017-01-10 19:37:24
 # @Last Modified by:   shubham
-# @Last Modified time: 2017-01-10 23:37:21
+# @Last Modified time: 2017-01-11 01:21:24
 
 import gym
 from gym import wrappers
@@ -17,7 +17,7 @@ from pprint import pprint
 from collections import defaultdict
 
 class Agent(object):
-	def __init__(self, nA=4, epsilon=0.5, epsilon_decay=0.99, alpha=0.5, gamma=1):
+	def __init__(self, nA=4, epsilon=0.5, epsilon_decay=0.99, alpha=0.2, gamma=1):
 		self.nA = nA
 		self.epsilon = epsilon
 		self.epsilon_decay = epsilon_decay
@@ -37,14 +37,15 @@ class Agent(object):
 		# select an action base on prob
 		action = np.random.choice(self.nA, p=action_prob)
 
-		# decay epsilon
-		self.epsilon *= self.epsilon_decay
 		return action
 
 	def set_initial_state(self, state):
 		self.state = state
 		self.action = self.policy(state)
 		# print(len(self.Q.keys()))
+		
+		# decay epsilon
+		self.epsilon *= self.epsilon_decay
 		return self.action
 	
 	def act(self, next_state, reward):
@@ -67,7 +68,7 @@ class Agent(object):
 
 def build_state(observation):
 	bins_range = [(-2.4, 2.4), (-2, 2), (-1, 1), (-3.5, 3.5)]
-	bins = [np.linspace(mn, mx, 10) for mn, mx in bins_range]
+	bins = [np.linspace(mn, mx, 11)[1:-1] for mn, mx in bins_range]
 	
 	state = ''
 	for feature, _bin in zip(observation, bins):
@@ -77,18 +78,17 @@ def build_state(observation):
 def main():
 	env = gym.make('CartPole-v0')
 	outdir = './experiment-results'
-	env = wrappers.Monitor(env, directory=outdir, force=True)
+	env = wrappers.Monitor(env, directory=outdir, force=True, video_callable=False)
 
 	agent = Agent(env.action_space.n)
-	for i_episode in range(100000):
+	total_t = 0
+	for i_episode in range(50000):
 		observation = env.reset()
 		state = build_state(observation)
 		action = agent.set_initial_state(state)
 
-		episode_reward = 0
 		for t in range(200):
 			next_ob, reward, done, info = env.step(action)
-			episode_reward += reward
 			next_state = build_state(next_ob)
 
 			if done: reward = -200
@@ -96,8 +96,9 @@ def main():
 			if done:
 				break
 
+		total_t += t
 		if (i_episode + 1) % 100 == 0:
-			print("\rEpisode: {}, Reward: {}".format(i_episode + 1, episode_reward), end="")
+			print("\rEpisode: {}, Reward: {}".format(i_episode + 1, total_t/(i_episode+1)), end="")
 			sys.stdout.flush()
 	
 	env.close()
