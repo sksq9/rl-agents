@@ -2,7 +2,7 @@
 # @Author: shubham
 # @Date:   2017-01-10 19:37:24
 # @Last Modified by:   shubham
-# @Last Modified time: 2017-01-14 21:56:52
+# @Last Modified time: 2017-01-14 21:56:39
 
 import gym
 from gym import wrappers
@@ -25,7 +25,7 @@ class Agent(object):
 		
 
 def main():
-	env = gym.make('CartPole-v0')
+	env = gym.make('MountainCar-v0')
 	outdir = './experiment-results'
 	env = wrappers.Monitor(env, directory=outdir, force=True)
 
