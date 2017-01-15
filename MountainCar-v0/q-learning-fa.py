@@ -2,22 +2,24 @@
 # @Author: shubham
 # @Date:   2017-01-14 21:48:19
 # @Last Modified by:   shubham
-# @Last Modified time: 2017-01-14 21:52:25
+# @Last Modified time: 2017-01-15 22:52:58
+
+import sys
+import itertools
 
 import gym
-import itertools
-import matplotlib
 import numpy as np
-import sys
+import matplotlib
+
 import sklearn.pipeline
 import sklearn.preprocessing
-
-if "../" not in sys.path:
-	sys.path.append("../") 
-
-from lib import plotting
 from sklearn.linear_model import SGDRegressor
 from sklearn.kernel_approximation import RBFSampler
+
+if "../" not in sys.path:
+	sys.path.append("../")
+
+from lib import plotting
 matplotlib.style.use('ggplot')
 
 env = gym.envs.make("MountainCar-v0")
@@ -80,15 +82,20 @@ class Estimator():
 			
 		"""
 		# TODO: Implement this!
-		return 0 if a else np.zeros(env.action_space.n)
+		features = self.featurize_state(s)
+		if a: 
+			return self.models[a].predict([features])[0]
+		else:
+			return np.array([model.predict([features])[0] for model in self.models])
 	
 	def update(self, s, a, y):
 		"""
 		Updates the estimator parameters for a given state and action towards
 		the target y.
 		"""
-		# TODO: Implement this!
-		return None
+		features = self.featurize_state(s)
+		self.models[a].partial_fit([features], [y])
+		# return None
 
 
 def make_epsilon_greedy_policy(estimator, epsilon, nA):
@@ -114,7 +121,7 @@ def make_epsilon_greedy_policy(estimator, epsilon, nA):
 	return policy_fn
 
 
-def q_learning(env, estimator, num_episodes, discount_factor=1.0, epsilon=0.1, epsilon_decay=1.0):
+def q_learning(env, estimator, num_episodes, gamma=1.0, epsilon=0.1, epsilon_decay=1.0):
 	"""
 	Q-Learning algorithm for fff-policy TD control using Function Approximation.
 	Finds the optimal greedy policy while following an epsilon-greedy policy.
@@ -123,7 +130,7 @@ def q_learning(env, estimator, num_episodes, discount_factor=1.0, epsilon=0.1, e
 		env: OpenAI environment.
 		estimator: Action-Value function estimator
 		num_episodes: Number of episodes to run for.
-		discount_factor: Lambda time discount factor.
+		gamma: Lambda time discount factor.
 		epsilon: Chance the sample a random action. Float betwen 0 and 1.
 		epsilon_decay: Each episode, epsilon is decayed by this factor
 	
@@ -139,8 +146,7 @@ def q_learning(env, estimator, num_episodes, discount_factor=1.0, epsilon=0.1, e
 	for i_episode in range(num_episodes):
 		
 		# The policy we're following
-		policy = make_epsilon_greedy_policy(
-			estimator, epsilon * epsilon_decay**i_episode, env.action_space.n)
+		policy = make_epsilon_greedy_policy(estimator, epsilon * epsilon_decay**i_episode, env.action_space.n)
 		
 		# Print out which episode we're on, useful for debugging.
 		# Also print reward for last episode
@@ -148,7 +154,27 @@ def q_learning(env, estimator, num_episodes, discount_factor=1.0, epsilon=0.1, e
 		print("\rEpisode {}/{} ({})".format(i_episode + 1, num_episodes, last_reward), end="")
 		sys.stdout.flush()
 		
-		# TODO: Implement this!
+		state = env.reset()
+		# for each step
+		for t in itertools.count():
+			# choose an action
+			prob = policy(state)
+			action = np.random.choice(env.action_space.n, p=prob)
+			
+			# take the action
+			next_state, reward, done, info = env.step(action)
+
+			# Update statistics
+			stats.episode_rewards[i_episode] += reward
+			stats.episode_lengths[i_episode] = t
+
+			# Update estimator to TD target
+			td_target = reward + gamma * np.max(estimator.predict(next_state))
+			estimator.update(state, action, td_target)
+			
+			if done:
+				break
+			state = next_state
 	
 	return stats
 
@@ -160,7 +186,6 @@ estimator = Estimator()
 # because our initial estimate for all states is too "optimistic" which leads
 # to the exploration of all states.
 stats = q_learning(env, estimator, 100, epsilon=0.0)
-
 
 plotting.plot_cost_to_go_mountain_car(env, estimator)
 plotting.plot_episode_stats(stats, smoothing_window=25)
