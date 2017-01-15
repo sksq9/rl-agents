@@ -2,7 +2,7 @@
 # @Author: shubham
 # @Date:   2017-01-14 21:48:19
 # @Last Modified by:   shubham
-# @Last Modified time: 2017-01-15 23:17:12
+# @Last Modified time: 2017-01-16 01:09:24
 
 import sys
 import itertools
@@ -51,12 +51,14 @@ class Estimator():
 		# action space. Alternatively we could somehow encode the action
 		# into the features, but this way it's easier to code up.
 		self.models = []
+		features = [self.featurize_state(env.reset())]
 		for _ in range(env.action_space.n):
 			model = SGDRegressor(learning_rate="constant")
 			# We need to call partial_fit once to initialize the model
 			# or we get a NotFittedError when trying to make a prediction
 			# This is quite hacky.
-			model.partial_fit([self.featurize_state(env.reset())], [0])
+			# features = [self.featurize_state(env.reset())]
+			model.partial_fit(features, [0])
 			self.models.append(model)
 	
 	def featurize_state(self, state):
@@ -66,7 +68,7 @@ class Estimator():
 		scaled = scaler.transform([state])
 		featurized = featurizer.transform(scaled)
 		return featurized[0]
-	
+
 	def predict(self, s, a=None):
 		"""
 		Makes value function predictions.
@@ -185,7 +187,7 @@ estimator = Estimator()
 # Note: For the Mountain Car we don't actually need an epsilon > 0.0
 # because our initial estimate for all states is too "optimistic" which leads
 # to the exploration of all states.
-stats = q_learning(env, estimator, 100, epsilon=0.0)
+stats = q_learning(env, estimator, 500, epsilon=0.0)
 
 plotting.plot_cost_to_go_mountain_car(env, estimator)
 plotting.plot_episode_stats(stats, smoothing_window=25)
