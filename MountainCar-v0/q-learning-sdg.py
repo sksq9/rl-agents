@@ -2,7 +2,7 @@
 # @Author: shubham
 # @Date:   2017-01-10 19:37:24
 # @Last Modified by:   shubham
-# @Last Modified time: 2017-01-16 01:16:52
+# @Last Modified time: 2017-01-16 01:26:22
 
 import gym
 from gym import wrappers
@@ -27,6 +27,10 @@ matplotlib.style.use('ggplot')
 
 
 class Estimator(object):
+	"""
+	Q state value function estimator
+	Uses SDG to estimate Q
+	"""
 	def __init__(self, n, scaler, featurizer, sample_state):
 		self.n = n
 		self.scaler = scaler
@@ -48,8 +52,8 @@ class Estimator(object):
 		featurized = self.featurizer.transform(scaled)
 		return featurized[0]
 
-	def hack(self, state):
-		[self.update(state, a, 0) for a in range(self.n)]
+	# def hack(self, state):
+	# 	[self.update(state, a, 0) for a in range(self.n)]
 
 	def predict(self, state):
 		features = [self.featurize(state)]
@@ -123,8 +127,7 @@ def main():
 			("rbf1", RBFSampler(gamma=5.0, n_components=100)),
 			("rbf2", RBFSampler(gamma=2.0, n_components=100)),
 			("rbf3", RBFSampler(gamma=1.0, n_components=100)),
-			("rbf4", RBFSampler(gamma=0.5, n_components=100))
-			])
+			("rbf4", RBFSampler(gamma=0.5, n_components=100))])
 	featurizer.fit(scaler.transform(observation_examples))
 
 	agent = Agent(env.action_space.n, scaler, featurizer, env.observation_space.sample(), epsilon=0, gamma=1)
@@ -140,7 +143,7 @@ def main():
 			next_state, reward, done, info = env.step(action)
 			action = agent.act(next_state, reward)
 			
-			# Update statistics
+			# book-keeping
 			stats.episode_rewards[i_episode] += reward
 			stats.episode_lengths[i_episode] = t
 
