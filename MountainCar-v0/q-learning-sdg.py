@@ -2,7 +2,7 @@
 # @Author: shubham
 # @Date:   2017-01-10 19:37:24
 # @Last Modified by:   shubham
-# @Last Modified time: 2017-01-15 23:23:38
+# @Last Modified time: 2017-01-15 23:31:02
 
 import gym
 from gym import wrappers
@@ -67,9 +67,18 @@ class Agent(object):
 		self.action = self.policy(state)
 		return self.action
 	
-	def act(self, state, reward):
-		
-		
+	def act(self, next_state, reward):
+		state = self.state
+		action = self.action
+		gamma = self.gamma
+
+		# td update
+		td_target = reward + gamma * np.max(self.Q.predict(next_state))
+		self.Q.update(state, action, target)
+
+		self.state = next_state
+		self.action = self.policy(next_state)
+		return self.action
 
 def main():
 	env = gym.make('MountainCar-v0')
