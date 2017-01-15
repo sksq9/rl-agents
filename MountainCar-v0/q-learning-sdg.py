@@ -2,7 +2,7 @@
 # @Author: shubham
 # @Date:   2017-01-10 19:37:24
 # @Last Modified by:   shubham
-# @Last Modified time: 2017-01-15 23:31:02
+# @Last Modified time: 2017-01-15 23:44:09
 
 import gym
 from gym import wrappers
@@ -19,10 +19,12 @@ import itertools
 
 class Estimator(object):
 	def __init__(self, n):
+		self.n = n
 		self.models = []
 		for _ in range(n):
 			clf = SGDRegressor()
 			
+			# bit of hack
 			# state = env.observation_space.sample()
 			# features = [self.featurizer(state)]
 			# target = [0]
@@ -30,9 +32,15 @@ class Estimator(object):
 			
 			self.models.append(clf)
 
+	def featurizer(self, state):
+		return state
+
+	def hack(self, state):
+		[self.update(state, a, 0) for a in range(self.n)]
+
 	def predict(self, state):
 		features = [self.featurizer(state)]
-		return [model[action].predict(features)[0] for model in self.models]
+		return [model.predict(features)[0] for model in self.models]
 
 	def update(self, state, action, target):
 		features = [self.featurizer(state)]
@@ -41,7 +49,7 @@ class Estimator(object):
 
 
 class Agent(object):
-	def __init__(self, nA=None):
+	def __init__(self, nA=4, epsilon=0.5, epsilon_decay=0.99, alpha=0.2, gamma=1):
 		self.nA = nA
 		self.epsilon = epsilon
 		self.epsilon_decay = epsilon_decay
@@ -63,6 +71,8 @@ class Agent(object):
 		return action
 
 	def set_initial_state(self, state):
+		self.Q.hack(state)
+		
 		self.state = state
 		self.action = self.policy(state)
 		return self.action
