@@ -2,7 +2,7 @@
 # @Author: shubham
 # @Date:   2017-01-10 19:37:24
 # @Last Modified by:   shubham
-# @Last Modified time: 2017-01-15 23:21:53
+# @Last Modified time: 2017-01-15 23:23:38
 
 import gym
 from gym import wrappers
@@ -63,10 +63,12 @@ class Agent(object):
 		return action
 
 	def set_initial_state(self, state):
-		return np.random.choice(self.nA)
+		self.state = state
+		self.action = self.policy(state)
+		return self.action
 	
 	def act(self, state, reward):
-		return np.random.choice(self.nA)
+		
 		
 
 def main():
