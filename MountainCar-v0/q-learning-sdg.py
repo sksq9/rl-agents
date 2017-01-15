@@ -2,7 +2,7 @@
 # @Author: shubham
 # @Date:   2017-01-10 19:37:24
 # @Last Modified by:   shubham
-# @Last Modified time: 2017-01-15 23:44:09
+# @Last Modified time: 2017-01-15 23:45:17
 
 import gym
 from gym import wrappers
@@ -84,7 +84,7 @@ class Agent(object):
 
 		# td update
 		td_target = reward + gamma * np.max(self.Q.predict(next_state))
-		self.Q.update(state, action, target)
+		self.Q.update(state, action, td_target)
 
 		self.state = next_state
 		self.action = self.policy(next_state)
