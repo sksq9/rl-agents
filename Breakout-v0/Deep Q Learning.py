@@ -2,16 +2,17 @@
 # @Author: shubham
 # @Date:   2017-01-16 12:12:33
 # @Last Modified by:   shubham
-# @Last Modified time: 2017-01-16 12:14:01
+# @Last Modified time: 2017-01-16 20:07:30
 
 import gym
-import itertools
+from gym import wrappers
 import numpy as np
 import tensorflow as tf
 
 import os
-import random
 import sys
+import random
+import itertools
 
 if "../" not in sys.path:
   sys.path.append("../")
@@ -321,9 +322,8 @@ def deep_q_learning(sess,
         pass
 
     # Record videos
-    env.monitor.start(monitor_path,
-                      resume=True,
-                      video_callable=lambda count: count % record_video_every == 0)
+    # env.monitor.start(monitor_path, resume=True, video_callable=lambda count: count % record_video_every == 0)
+    env = wrappers.Monitor(env, directory=monitor_path, force=True, resume=True, video_callable=lambda count: count % record_video_every == 0)
 
     for i_episode in range(num_episodes):
 
@@ -390,7 +390,8 @@ def deep_q_learning(sess,
             episode_lengths=stats.episode_lengths[:i_episode+1],
             episode_rewards=stats.episode_rewards[:i_episode+1])
 
-    env.monitor.close()
+    # env.monitor.close()
+    env.close()
     return stats
 
 
