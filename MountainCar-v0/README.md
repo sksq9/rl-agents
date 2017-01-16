@@ -6,6 +6,13 @@
 
 ## Algorithms
 
-### Q-Learning with FA
+### Q-Learning
 
-WIP
+Q-Learning with function approximation. Stochastic Gradient Descent is used with Least Square Error to minimize difference between predicted `Q[state][action]` and Q-value in accordance with Q-Learning.
+
+Input features are normalized to zero mean and unit variance and further passed through 4 different RBF kernels with varying variance. A seperate model is use for each action in practice. At **each step** the model is update to fit the predicted `td_target` according to:
+
+```
+td_target = reward + gamma * max(Q.predict(next_state))
+Q.update(state, action, td_target) # SGD model fitting
+```
