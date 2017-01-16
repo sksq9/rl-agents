@@ -22,7 +22,7 @@ This process is carried until correct set of weights are selected and they are c
 
 Q-Learning in a tabular fashion is implemented. State space is discretized to account for infinitely many states. Each state feature is divided into several (~10) bins, ranging from `feature_min` to `feature_max`. 
 
-The policy followed by the agent is an ε-greedy policy, where at each step, the action seleced is from the `Q table` ε-greedily. Further the updated of Q-values are carried out at **each step** according to
+The policy followed by the agent is an ε-greedy policy, where at each step, the action seleced is from the `Q table` ε-greedily. Further the updation of Q-values are carried out at **each step** according to:
 
 ```
 td_target = reward + gamma * max(Q[next_state])
