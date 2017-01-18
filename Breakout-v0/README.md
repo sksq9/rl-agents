@@ -1,3 +1,3 @@
 # Breakout-v0
 
-WIP
+Atari 2600 game Breakout
